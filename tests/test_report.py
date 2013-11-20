@@ -8,7 +8,9 @@
 
 '''
 import unittest
+import tempfile
 
+from pyPdf import PdfFileReader
 import trytond.tests.test_tryton
 from trytond.transaction import Transaction
 from trytond.tests.test_tryton import POOL, USER, DB_NAME, CONTEXT
@@ -119,9 +121,16 @@ class ReportTestCase(unittest.TestCase):
 
             val = UserReport.execute([USER], {'name': u'Cédric'})
             self.assertEqual(val[0], u'pdf')
-            self.assertTrue(
-                str(val[1]), '<h1>Héllø, Cédric!</h1>'
-            )
+
+            with tempfile.TemporaryFile() as file:
+                file.write(str(val[1]))
+                pdf = PdfFileReader(file)
+
+                # Probably the only thing you can check from a shitty PDF
+                # format. God save Adobe and its god forsaken format.
+                #
+                # PDF IS EVIL
+                self.assertEqual(pdf.getNumPages(), 1)
 
 
 def suite():

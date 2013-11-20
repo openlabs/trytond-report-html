@@ -44,7 +44,7 @@ setup(
     license='GPL-3',
     install_requires=requires,
     tests_require=[
-        'pdfminer',     # Check if the resultant pdf has the same content
+        'pyPDF',     # Check if the resultant pdf has the same content
     ],
     zip_safe=False,
     test_suite='tests.suite',
