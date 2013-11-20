@@ -42,24 +42,6 @@ class ReportTestCase(unittest.TestCase):
 
         trytond.tests.test_tryton.install_module('res')
 
-        IRReport = POOL.get('ir.action.report')
-
-        return
-        with Transaction().start(DB_NAME, USER, context=CONTEXT):
-            self.report_html, self.report_pdf = IRReport.create([{
-                'name': 'HTML Report',
-                'model': 'res.user',
-                'report_name': 'res.user',
-                'report_content_custom': 'Hello ${records[0].name}',
-                'extension': 'html',
-            }, {
-                'name': 'PDF Report',
-                'model': 'res.user',
-                'report_name': 'res.user.pdf',
-                'report_content_custom': 'Hello ${records[0].name}',
-                'extension': 'pdf',
-            }])
-
     def test_0010_render_report_xhtml(self):
         '''
         Render the report without PDF conversion
