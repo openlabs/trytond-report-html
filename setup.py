@@ -3,7 +3,7 @@
 #this repository contains the full copyright notices and license terms.
 from setuptools import setup
 
-VERSION = '3.0.0.1'
+VERSION = '2.6.0.1'
 
 major_version, minor_version, _ = VERSION.split('.', 2)
 major_version = int(major_version)
