@@ -68,13 +68,13 @@ class ReportTestCase(unittest.TestCase):
         IRReport = POOL.get('ir.action.report')
 
         with Transaction().start(DB_NAME, USER, context=CONTEXT):
-            report_html, = IRReport.create([{
+            IRReport.create({
                 'name': 'HTML Report',
                 'model': 'res.user',
                 'report_name': 'res.user',
                 'report_content': buffer('<h1>Hello, ${records[0].name}!</h1>'),
                 'extension': 'html',
-            }])
+            })
             val = UserReport.execute([USER], {})
             self.assertEqual(val[0], u'html')
             self.assertEqual(
@@ -89,13 +89,13 @@ class ReportTestCase(unittest.TestCase):
         IRReport = POOL.get('ir.action.report')
 
         with Transaction().start(DB_NAME, USER, context=CONTEXT):
-            report_html, = IRReport.create([{
+            IRReport.create({
                 'name': 'HTML Report',
                 'model': 'res.user',
                 'report_name': 'res.user',
                 'report_content': buffer("<h1>Héllø, ${data['name']}!</h1>"),
                 'extension': 'html',
-            }])
+            })
 
             val = UserReport.execute([USER], {'name': u'Cédric'})
             self.assertEqual(val[0], u'html')
@@ -111,13 +111,13 @@ class ReportTestCase(unittest.TestCase):
         IRReport = POOL.get('ir.action.report')
 
         with Transaction().start(DB_NAME, USER, context=CONTEXT):
-            report_html, = IRReport.create([{
+            IRReport.create({
                 'name': 'HTML Report',
                 'model': 'res.user',
                 'report_name': 'res.user',
                 'report_content': buffer("<h1>Héllø, ${data['name']}!</h1>"),
                 'extension': 'pdf',
-            }])
+            })
 
             val = UserReport.execute([USER], {'name': u'Cédric'})
             self.assertEqual(val[0], u'pdf')
