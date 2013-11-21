@@ -1,6 +1,9 @@
 Webkit based PDF report engine
 ==============================
 
+.. image:: https://travis-ci.org/openlabs/trytond-report-webkit.png?branch=2.6
+    :target: https://travis-ci.org/openlabs/trytond-report-webkit
+
 This package allows you to build HTML based reports and then convert them
 into PDFs using `wkhtmltopdf` which uses the webkit rendering engine and
 QT. (WebKit is the engine of Apples Safari).
