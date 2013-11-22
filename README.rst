@@ -11,7 +11,7 @@ QT. (WebKit is the engine of Apples Safari).
 The templates are written using `Genshi <http://genshi.edgewall.org>`_.
 Though Genshi is not our favorite templating engine, it is a package
 tryton core depends on, and the authors did not want to add another
-template engine as its dependency. Genshi comes with a faily good
+template engine as its dependency. Genshi comes with a fairly good
 `tutorial <http://genshi.edgewall.org/wiki/Documentation/xml-templates.html>`_.
 
 Using this in your projects
