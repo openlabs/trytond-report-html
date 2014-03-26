@@ -87,4 +87,5 @@ class ReportWebkit(Report):
         """
         with tempfile.TemporaryFile(prefix='trytond_') as file:
             file.write(data)
+            file.seek(0)
             return pdfkit.from_file(file, False, options=options)
