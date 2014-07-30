@@ -1,6 +1,6 @@
 #!/usr/bin/env python
-#This file is part of Tryton. The COPYRIGHT file at the top level of
-#this repository contains the full copyright notices and license terms.
+# This file is part of Tryton. The COPYRIGHT file at the top level of
+# this repository contains the full copyright notices and license terms.
 from setuptools import setup
 
 VERSION = '3.0.2.1'
@@ -9,9 +9,7 @@ major_version, minor_version, _ = VERSION.split('.', 2)
 major_version = int(major_version)
 minor_version = int(minor_version)
 
-requires = [
-    'pdfkit',
-]
+requires = []
 requires.append(
     'trytond >= %s.%s, < %s.%s' %
     (major_version, minor_version, major_version, minor_version + 1)
