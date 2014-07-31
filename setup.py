@@ -1,7 +1,41 @@
 #!/usr/bin/env python
 # This file is part of Tryton. The COPYRIGHT file at the top level of
 # this repository contains the full copyright notices and license terms.
-from setuptools import setup
+import os
+import sys
+import unittest
+
+from setuptools import setup, Command
+
+
+class SQLiteTest(Command):
+    """
+    Run the tests on SQLite
+    """
+    description = "Run tests on SQLite"
+
+    user_options = []
+
+    def initialize_options(self):
+        pass
+
+    def finalize_options(self):
+        pass
+
+    def run(self):
+        if self.distribution.tests_require:
+            self.distribution.fetch_build_eggs(self.distribution.tests_require)
+
+        from trytond.config import CONFIG
+        CONFIG['db_type'] = 'sqlite'
+        os.environ['DB_NAME'] = ':memory:'
+
+        from tests import suite
+        test_result = unittest.TextTestRunner(verbosity=3).run(suite())
+
+        if test_result.wasSuccessful():
+            sys.exit(0)
+        sys.exit(-1)
 
 VERSION = '3.2.0.1'
 
@@ -47,4 +81,7 @@ setup(
     zip_safe=False,
     test_suite='tests.suite',
     test_loader='trytond.test_loader:Loader',
+    cmdclass={
+        'test': SQLiteTest,
+    },
 )
