@@ -13,12 +13,12 @@ except ImportError:
 import time
 import datetime
 import tempfile
-import subprocess
 
 from genshi.template import MarkupTemplate
 from trytond.pool import Pool
 from trytond.transaction import Transaction
 from trytond.report import Report, TranslateFactory, Translator, FORMAT2EXT
+from executor import execute
 
 
 class ReportWebkit(Report):
@@ -86,23 +86,23 @@ class ReportWebkit(Report):
         Call wkhtmltopdf to convert the html to pdf
         """
         with tempfile.NamedTemporaryFile(
-            suffix='.html', prefix='trytond_'
+            suffix='.html', prefix='trytond_', delete=False
         ) as source_file:
+            file_name = source_file.name
             source_file.write(data)
+            source_file.close()
 
             # Evaluate argument to run with subprocess
-            args = ['wkhtmltopdf']
+            args = 'wkhtmltopdf'
             # Add Global Options
             if options:
                 for option, value in options.items():
-                    args.append('--%s' % option)
+                    args += ' --%s' % option
                     if value:
-                        args.append(value)
-            # Add source file name and output file name
-            args.extend([source_file.name, source_file.name + '.pdf'])
+                        args += ' "%s"' % value
 
-            # Run the above evaluated argument
-            result = subprocess.Popen(args)
-            # Wait until the above process is complete
-            result.communicate()
-            return open(source_file.name + '.pdf').read()
+            # Add source file name and output file name
+            args += ' %s %s.pdf' % (file_name, file_name)
+            # Execute the command using executor
+            execute(args)
+            return open(file_name + '.pdf').read()

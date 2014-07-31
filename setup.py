@@ -43,7 +43,9 @@ major_version, minor_version, _ = VERSION.split('.', 2)
 major_version = int(major_version)
 minor_version = int(minor_version)
 
-requires = []
+requires = [
+    'executor'
+]
 requires.append(
     'trytond >= %s.%s, < %s.%s' %
     (major_version, minor_version, major_version, minor_version + 1)
