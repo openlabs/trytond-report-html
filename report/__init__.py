@@ -10,11 +10,18 @@ try:
     import cStringIO as StringIO
 except ImportError:
     import StringIO
+import os
 import time
 import datetime
 import tempfile
+from functools import partial
+
+from jinja2 import Environment, FunctionLoader
+from babel.dates import format_date, format_datetime
+from babel.numbers import format_currency
 
 from genshi.template import MarkupTemplate
+from trytond.tools import file_open
 from trytond.pool import Pool
 from trytond.transaction import Transaction
 from trytond.report import Report, TranslateFactory, Translator, FORMAT2EXT
@@ -65,9 +72,12 @@ class ReportWebkit(Report):
         return (oext, result)
 
     @classmethod
-    def render_template(cls, template_string, localcontext, translator):
+    def render_template_genshi(cls, template_string, localcontext, translator):
         """
-
+        Legacy genshi rendered for backward compatibility. If your report is
+        still dependent on genshi, implement the method render_template in
+        your custom report and call this method with the same arguments and
+        return the value instead.
         """
         report_template = MarkupTemplate(template_string)
 
@@ -79,6 +89,61 @@ class ReportWebkit(Report):
         stream = report_template.generate(**localcontext)
 
         return stream.render('xhtml').encode('utf-8')
+
+    @classmethod
+    def jinja_loader_func(cls, name):
+        """
+        Return the template from the module directories using the logic
+        below:
+
+        The name is expected to be in the format:
+
+            <module_name>/path/to/template
+
+        for example, if the account_reports module had a base template in
+        its reports folder, then you should be able to use:
+
+            {% extends 'account_reports/report/base.html' %}
+        """
+        module, path = name.split('/', 1)
+        try:
+            return file_open(os.path.join(module, path)).read()
+        except IOError:
+            return None
+
+    @classmethod
+    def get_jinja_filters(cls):
+        """
+        Returns filters that are made available in the template context.
+        By default, the following filters are available:
+
+        * dateformat: Formats a date using babel
+        * datetimeformat: Formats a datetime using babel
+        * currencyformat: Formats the given number as currency
+
+        For additional arguments that can be passed to these filters,
+        refer to the Babel `Documentation
+        <http://babel.edgewall.org/wiki/Documentation>`_.
+        """
+        return {
+            'dateformat': partial(format_date, locale=Transaction().language),
+            'datetimeformat': partial(
+                format_datetime, locale=Transaction().language
+            ),
+            'currencyformat': partial(
+                format_currency, locale=Transaction().language
+            ),
+        }
+
+    @classmethod
+    def render_template(cls, template_string, localcontext, translator):
+        """
+        Render the template using Jinja2
+        """
+        env = Environment(loader=FunctionLoader(cls.jinja_loader_func))
+        env.filters.update(cls.get_jinja_filters())
+        report_template = env.from_string(template_string.decode('utf-8'))
+        return report_template.render(**localcontext).encode('utf-8')
 
     @classmethod
     def wkhtml_to_pdf(cls, data, options=None):

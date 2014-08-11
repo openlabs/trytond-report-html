@@ -14,6 +14,9 @@ tryton core depends on, and the authors did not want to add another
 template engine as its dependency. Genshi comes with a fairly good
 `tutorial <http://genshi.edgewall.org/wiki/Documentation/xml-templates.html>`_.
 
+The package also supports `Jinja's <http://jinja.pocoo.org/>`_ Template
+`Inheritance <http://jinja.pocoo.org/docs/templates/#template-inheritance>`_.
+
 Using this in your projects
 ===========================
 
