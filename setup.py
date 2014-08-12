@@ -37,14 +37,16 @@ class SQLiteTest(Command):
             sys.exit(0)
         sys.exit(-1)
 
-VERSION = '3.2.0.2'
+VERSION = '3.2.0.3'
 
 major_version, minor_version, _ = VERSION.split('.', 2)
 major_version = int(major_version)
 minor_version = int(minor_version)
 
 requires = [
-    'executor'
+    'executor',
+    'jinja2',
+    'babel',
 ]
 requires.append(
     'trytond >= %s.%s, < %s.%s' %

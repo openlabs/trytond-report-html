@@ -54,7 +54,9 @@ class ReportTestCase(unittest.TestCase):
                 'name': 'HTML Report',
                 'model': 'res.user',
                 'report_name': 'res.user',
-                'report_content': buffer('<h1>Hello, ${records[0].name}!</h1>'),
+                'report_content': buffer(
+                    '<h1>Hello, {{records[0].name}}!</h1>'
+                ),
                 'extension': 'html',
             }])
             val = UserReport.execute([USER], {})
@@ -75,7 +77,7 @@ class ReportTestCase(unittest.TestCase):
                 'name': 'HTML Report',
                 'model': 'res.user',
                 'report_name': 'res.user',
-                'report_content': buffer("<h1>Héllø, ${data['name']}!</h1>"),
+                'report_content': buffer("<h1>Héllø, {{data['name']}}!</h1>"),
                 'extension': 'html',
             }])
 
@@ -97,7 +99,7 @@ class ReportTestCase(unittest.TestCase):
                 'name': 'HTML Report',
                 'model': 'res.user',
                 'report_name': 'res.user',
-                'report_content': buffer("<h1>Héllø, ${data['name']}!</h1>"),
+                'report_content': buffer("<h1>Héllø, {{data['name']}}!</h1>"),
                 'extension': 'pdf',
             }])
 
