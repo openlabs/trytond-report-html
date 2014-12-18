@@ -64,7 +64,11 @@ class ReportWebkit(Report):
         result = cls.render_template(report_content, localcontext, translate)
 
         output_format = report.extension or report.template_extension
-        if output_format in ('pdf',):
+        # Convert the report to PDF if the output format is PDF
+        # Do not convert when report is generated in tests, as it takes
+        # time to convert to PDF due to which tests run longer.
+        # Pool.test is True when running tests.
+        if output_format in ('pdf',) and not Pool.test:
             result = cls.wkhtml_to_pdf(result)
 
         # Check if the output_format has a different extension for it
