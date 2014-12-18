@@ -37,7 +37,7 @@ class SQLiteTest(Command):
             sys.exit(0)
         sys.exit(-1)
 
-VERSION = '3.2.0.3'
+VERSION = '3.2.0.4'
 
 major_version, minor_version, _ = VERSION.split('.', 2)
 major_version = int(major_version)
