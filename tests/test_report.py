@@ -103,8 +103,14 @@ class ReportTestCase(unittest.TestCase):
                 'extension': 'pdf',
             }])
 
+            # Set Pool.test as False as we need the report to be generated
+            # as PDF
+            Pool.test = False
             val = UserReport.execute([USER], {'name': u'Cédric'})
             self.assertEqual(val[0], u'pdf')
+
+            # Revert Pool.test back to True for other tests to run normally
+            Pool.test = True
 
             with tempfile.TemporaryFile() as file:
                 file.write(str(val[1]))
