@@ -111,7 +111,8 @@ class ReportWebkit(Report):
         """
         module, path = name.split('/', 1)
         try:
-            return file_open(os.path.join(module, path)).read()
+            with file_open(os.path.join(module, path)) as f:
+                return f.read()
         except IOError:
             return None
 
