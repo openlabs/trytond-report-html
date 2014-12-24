@@ -26,8 +26,7 @@ class SQLiteTest(Command):
         if self.distribution.tests_require:
             self.distribution.fetch_build_eggs(self.distribution.tests_require)
 
-        from trytond.config import CONFIG
-        CONFIG['db_type'] = 'sqlite'
+        os.environ['TRYTOND_DATABASE_URI'] = 'sqlite://'
         os.environ['DB_NAME'] = ':memory:'
 
         from tests import suite
@@ -37,7 +36,7 @@ class SQLiteTest(Command):
             sys.exit(0)
         sys.exit(-1)
 
-VERSION = '3.2.0.4'
+VERSION = '3.4.0.1'
 
 major_version, minor_version, _ = VERSION.split('.', 2)
 major_version = int(major_version)
