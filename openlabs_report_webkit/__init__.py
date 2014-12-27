@@ -125,11 +125,18 @@ class ReportWebkit(Report):
         * dateformat: Formats a date using babel
         * datetimeformat: Formats a datetime using babel
         * currencyformat: Formats the given number as currency
+        * modulepath: Returns the absolute path of a file inside a
+            tryton-module (e.g. sale/sale.css)
 
         For additional arguments that can be passed to these filters,
         refer to the Babel `Documentation
         <http://babel.edgewall.org/wiki/Documentation>`_.
         """
+        def module_path(name):
+            module, path = name.split('/', 1)
+            with file_open(os.path.join(module, path)) as f:
+                return 'file://' + f.name
+
         return {
             'dateformat': partial(format_date, locale=Transaction().language),
             'datetimeformat': partial(
@@ -138,6 +145,7 @@ class ReportWebkit(Report):
             'currencyformat': partial(
                 format_currency, locale=Transaction().language
             ),
+            'modulepath': module_path
         }
 
     @classmethod
