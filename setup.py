@@ -74,7 +74,7 @@ setup(
         'openlabs_report_webkit',
     ],
     package_dir={
-        'openlabs_report_webkit': 'report',
+        'openlabs_report_webkit': 'openlabs_report_webkit',
     },
     license='GPL-3',
     install_requires=requires,
