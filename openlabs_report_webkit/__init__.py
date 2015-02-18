@@ -6,6 +6,7 @@
     :license: GPLv3, see LICENSE for more details
 
 '''
+
 try:
     import cStringIO as StringIO
 except ImportError:
@@ -19,6 +20,10 @@ from functools import partial
 from jinja2 import Environment, FunctionLoader
 from babel.dates import format_date, format_datetime
 from babel.numbers import format_currency
+try:
+    import weasyprint
+except ImportError:
+    pass
 
 from genshi.template import MarkupTemplate
 from trytond.tools import file_open
@@ -125,11 +130,18 @@ class ReportWebkit(Report):
         * dateformat: Formats a date using babel
         * datetimeformat: Formats a datetime using babel
         * currencyformat: Formats the given number as currency
+        * modulepath: Returns the absolute path of a file inside a
+            tryton-module (e.g. sale/sale.css)
 
         For additional arguments that can be passed to these filters,
         refer to the Babel `Documentation
         <http://babel.edgewall.org/wiki/Documentation>`_.
         """
+        def module_path(name):
+            module, path = name.split('/', 1)
+            with file_open(os.path.join(module, path)) as f:
+                return 'file://' + f.name
+
         return {
             'dateformat': partial(format_date, locale=Transaction().language),
             'datetimeformat': partial(
@@ -138,6 +150,7 @@ class ReportWebkit(Report):
             'currencyformat': partial(
                 format_currency, locale=Transaction().language
             ),
+            'modulepath': module_path
         }
 
     @classmethod
@@ -149,6 +162,10 @@ class ReportWebkit(Report):
         env.filters.update(cls.get_jinja_filters())
         report_template = env.from_string(template_string.decode('utf-8'))
         return report_template.render(**localcontext).encode('utf-8')
+
+    @classmethod
+    def weasyprint(cls, data, options=None):
+        return weasyprint.HTML(string=data).write_pdf()
 
     @classmethod
     def wkhtml_to_pdf(cls, data, options=None):

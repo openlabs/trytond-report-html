@@ -36,7 +36,7 @@ class SQLiteTest(Command):
             sys.exit(0)
         sys.exit(-1)
 
-VERSION = '3.4.0.2'
+VERSION = '3.4.0.3'
 
 major_version, minor_version, _ = VERSION.split('.', 2)
 major_version = int(major_version)
@@ -74,13 +74,16 @@ setup(
         'openlabs_report_webkit',
     ],
     package_dir={
-        'openlabs_report_webkit': 'report',
+        'openlabs_report_webkit': 'openlabs_report_webkit',
     },
     license='GPL-3',
     install_requires=requires,
     tests_require=[
         'pyPDF',     # Check if the resultant pdf has the same content
     ],
+    extras_require={
+        'weasyprint': ['weasyprint']
+    },
     zip_safe=False,
     test_suite='tests.suite',
     test_loader='trytond.test_loader:Loader',
