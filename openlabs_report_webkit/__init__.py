@@ -6,6 +6,7 @@
     :license: GPLv3, see LICENSE for more details
 
 '''
+
 try:
     import cStringIO as StringIO
 except ImportError:
@@ -19,6 +20,10 @@ from functools import partial
 from jinja2 import Environment, FunctionLoader
 from babel.dates import format_date, format_datetime
 from babel.numbers import format_currency
+try:
+    import weasyprint
+except ImportError:
+    pass
 
 from genshi.template import MarkupTemplate
 from trytond.tools import file_open
@@ -157,6 +162,10 @@ class ReportWebkit(Report):
         env.filters.update(cls.get_jinja_filters())
         report_template = env.from_string(template_string.decode('utf-8'))
         return report_template.render(**localcontext).encode('utf-8')
+
+    @classmethod
+    def weasyprint(cls, data, options=None):
+        return weasyprint.HTML(string=data).write_pdf()
 
     @classmethod
     def wkhtml_to_pdf(cls, data, options=None):

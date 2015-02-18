@@ -81,6 +81,9 @@ setup(
     tests_require=[
         'pyPDF',     # Check if the resultant pdf has the same content
     ],
+    extras_require={
+        'weasyprint': ['weasyprint']
+    },
     zip_safe=False,
     test_suite='tests.suite',
     test_loader='trytond.test_loader:Loader',
