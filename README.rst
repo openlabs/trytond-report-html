@@ -8,7 +8,7 @@ Webkit based PDF report engine
 This package allows you to build HTML based reports and then convert them
 into PDFs using either `wkhtmltopdf` which uses the webkit rendering engine and
 QT. (WebKit is the engine of Apples Safari). or
-`Weasyprint<http://http://weasyprint.org/>`_
+`Weasyprint <http://http://weasyprint.org/>`_
 
 The templates are written using `Genshi <http://genshi.edgewall.org>`_.
 Though Genshi is not our favorite templating engine, it is a package
@@ -113,7 +113,7 @@ Example
 
 .. code-block:: html+jinja
 
-    Created on {{ sale.create_date|datetimeformat('long') }}</td>
+    <td>Created on {{ sale.create_date|datetimeformat('long') }}</td>
 
 currencyformat(amount, currency, format=None)
 `````````````````````````````````````````````
