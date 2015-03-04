@@ -10,14 +10,15 @@ into PDFs using either `wkhtmltopdf` which uses the webkit rendering engine and
 QT. (WebKit is the engine of Apples Safari). or
 `Weasyprint <http://http://weasyprint.org/>`_
 
-The templates are written using `Genshi <http://genshi.edgewall.org>`_.
-Though Genshi is not our favorite templating engine, it is a package
-tryton core depends on, and the authors did not want to add another
-template engine as its dependency. Genshi comes with a fairly good
-`tutorial <http://genshi.edgewall.org/wiki/Documentation/xml-templates.html>`_.
+The templates are written using `Jinja 2 <http://jinja.pocoo.org/>`_ 
+template engine. `Template Inheritance 
+<http://jinja.pocoo.org/docs/templates/#template-inheritance>`_ is also
+supported to make it easier to extend existing emails and having a single
+theme for all your emails.
 
-The package also supports `Jinja's <http://jinja.pocoo.org/>`_ Template
+The package also supports Genshi Template
 `Inheritance <http://jinja.pocoo.org/docs/templates/#template-inheritance>`_.
+
 
 Using this in your projects
 ===========================
