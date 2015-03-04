@@ -84,7 +84,9 @@ Template Filters
 ----------------
 
 Tryton HTML reports arrive with some builtin Template filters (in addition
-to the `built-in filters of Jinja2 <>`_) to make things easier:
+to the `built-in filters of Jinja2 
+<http://jinja.pocoo.org/docs/dev/templates/#list-of-builtin-filters>`_) to make
+things easier:
 
 dateformat(date, format='medium')
 `````````````````````````````````
