@@ -4,18 +4,21 @@ Webkit based PDF report engine
 .. image:: https://travis-ci.org/openlabs/trytond-report-webkit.png?branch=develop
     :target: https://travis-ci.org/openlabs/trytond-report-webkit
 
+
 This package allows you to build HTML based reports and then convert them
-into PDFs using `wkhtmltopdf` which uses the webkit rendering engine and
-QT. (WebKit is the engine of Apples Safari).
+into PDFs using either `wkhtmltopdf` which uses the webkit rendering engine and
+QT. (WebKit is the engine of Apples Safari). or
+`Weasyprint <http://http://weasyprint.org/>`_
 
-The templates are written using `Genshi <http://genshi.edgewall.org>`_.
-Though Genshi is not our favorite templating engine, it is a package
-tryton core depends on, and the authors did not want to add another
-template engine as its dependency. Genshi comes with a fairly good
-`tutorial <http://genshi.edgewall.org/wiki/Documentation/xml-templates.html>`_.
+The templates are written using `Jinja 2 <http://jinja.pocoo.org/>`_ 
+template engine. `Template Inheritance 
+<http://jinja.pocoo.org/docs/templates/#template-inheritance>`_ is also
+supported to make it easier to extend existing emails and having a single
+theme for all your emails.
 
-The package also supports `Jinja's <http://jinja.pocoo.org/>`_ Template
+The package also supports Genshi Template
 `Inheritance <http://jinja.pocoo.org/docs/templates/#template-inheritance>`_.
+
 
 Using this in your projects
 ===========================
@@ -29,6 +32,17 @@ ReportWebkit class from this package instead.
 
     class UserReport(ReportWebkit):
         __name__ = 'res.user'
+
+        @classmethod
+        def get_jinja_filters(cls, *args, **kwargs):
+            """
+            Add my custom filters
+            """
+            filters = super(UserReport, cls).get_jinja_filters(*args, **kwargs)
+            filters.update({
+                'nl2br': lambda value: value.replace('\n','<br>\n')
+            })
+            return filters
 
 
 Output Formats
@@ -66,6 +80,86 @@ override the convert api to use weasyprint. Example:
 
     # TODO: an example here
 
+
+Template Filters
+----------------
+
+Tryton HTML reports arrive with some builtin Template filters (in addition
+to the `built-in filters of Jinja2 
+<http://jinja.pocoo.org/docs/dev/templates/#list-of-builtin-filters>`_) to make
+things easier:
+
+dateformat(date, format='medium')
+`````````````````````````````````
+
+Format the date with the current language from the context. For other
+possible formats, refer the 
+`babel documentation <http://babel.pocoo.org/docs/dates/#date-and-time>`_.
+
+Example
+
+.. code-block:: html+jinja
+
+    <td>Date</td>
+    <td>{{ sale.date|dateformat }}</td>
+
+datetimeformat(datetime, format)
+````````````````````````````````
+
+Format the datetime with the current language from the context. For other
+possible formats, refer the 
+`babel documentation <http://babel.pocoo.org/docs/dates/#date-and-time>`_.
+
+Example
+
+.. code-block:: html+jinja
+
+    <td>Created on {{ sale.create_date|datetimeformat('long') }}</td>
+
+currencyformat(amount, currency, format=None)
+`````````````````````````````````````````````
+
+Return formatted currency value. For more formatting information refer
+`babel documentation <http://babel.pocoo.org/docs/api/numbers/?highlight=format_currency#babel.numbers.format_currency>`_
+
+Example
+
+.. code-block:: html+jinja
+
+    <td>Total Value</td>
+    <td>{{ sale.total_amount|currencyformat(sale.currency.code) }}</td>
+
+modulepath(name)
+````````````````
+
+Get the absolute Path of a file within a module
+
+Example
+
+.. code-block:: html+jinja
+
+   <img src="{{ 'company/logo.png'|modulepath }}"/>
+
+
+
+Of course you can add your own as stated above.
+
+
+Including Styles
+----------------
+
+To include stylesheets, images or any other static data you have two options:
+
+1. Have Tryton serving your files by adding the static-directory to your
+   Tryton json_path
+2. Bundle your static files inside the reports module and reference using
+
+.. code-block:: html+jinja
+
+    <link rel="stylesheet" href="{{ 'reports/main.css' | module_path }}" type="text/css">
+
+The second approach comes with the downside that static files will only be
+available on the server, so you can only see the formatted pdf
 
 Adding as a dependency
 ----------------------
