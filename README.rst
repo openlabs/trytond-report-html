@@ -102,3 +102,21 @@ The report file is missing
 * Did you add the template file to the package_data in your setup.py ?
 * Did you add the template file extension to the included files in
   MANIFEST ?
+  
+Authors and Contributors
+------------------------
+
+This module was built at `Openlabs <http://www.openlabs.co.in>`_. 
+
+We gratefully acknowledge contributions by:
+
+* `simon klemenc <https://github.com/hiaselhans>`_
+* `Udo Spallek <https://github.com/udono>`_
+
+Professional Support
+--------------------
+
+This module is professionally supported by `Openlabs <http://www.openlabs.co.in>`_.
+If you are looking for on-site teaching or consulting support, contact our
+`sales <mailto:sales@openlabs.co.in>`_ and `support
+<mailto:support@openlabs.co.in>`_ teams.
