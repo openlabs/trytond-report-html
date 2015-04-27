@@ -7,19 +7,14 @@
 
 '''
 
-try:
-    import cStringIO as StringIO
-except ImportError:
-    import StringIO
 import os
-import time
-import datetime
 import tempfile
 from functools import partial
 
 from jinja2 import Environment, FunctionLoader
 from babel.dates import format_date, format_datetime
 from babel.numbers import format_currency
+
 try:
     import weasyprint
 except ImportError:
@@ -29,56 +24,45 @@ from genshi.template import MarkupTemplate
 from trytond.tools import file_open
 from trytond.pool import Pool
 from trytond.transaction import Transaction
-from trytond.report import Report, TranslateFactory, Translator, FORMAT2EXT
+from trytond.report import Report, TranslateFactory, Translator
 from executor import execute
 
 
 class ReportWebkit(Report):
+    render_method = "webkit"
 
     @classmethod
-    def parse(cls, report, records, data, localcontext):
-        '''
-        Parse the report and return a tuple with report type and report.
-        '''
+    def render(cls, report, report_context):
         pool = Pool()
-        User = pool.get('res.user')
         Translation = pool.get('ir.translation')
-
-        localcontext['data'] = data
-        localcontext['user'] = User(Transaction().user)
-        localcontext['formatLang'] = lambda *args, **kargs: \
-            cls.format_lang(*args, **kargs)
-        localcontext['StringIO'] = StringIO.StringIO
-        localcontext['time'] = time
-        localcontext['datetime'] = datetime
-        localcontext['context'] = Transaction().context
-
-        translate = TranslateFactory(cls.__name__, Transaction().language,
-            Translation)
-        localcontext['setLang'] = lambda language: translate.set_language(
-            language)
-        localcontext['records'] = records
 
         # Convert to str as buffer from DB is not supported by StringIO
         report_content = (str(report.report_content) if report.report_content
-            else False)
-
+                          else False)
         if not report_content:
             raise Exception('Error', 'Missing report file!')
 
-        result = cls.render_template(report_content, localcontext, translate)
+        translate = TranslateFactory(cls.__name__, Transaction().language,
+                                     Translation)
+        report_context['setLang'] = lambda language: translate.set_language(
+            language)
 
-        output_format = report.extension or report.template_extension
+        return cls.render_template(report_content, report_context, translate)
+
+    @classmethod
+    def convert(cls, report, data):
         # Convert the report to PDF if the output format is PDF
         # Do not convert when report is generated in tests, as it takes
         # time to convert to PDF due to which tests run longer.
         # Pool.test is True when running tests.
-        if output_format in ('pdf',) and not Pool.test:
-            result = cls.wkhtml_to_pdf(result)
+        output_format = report.extension or report.template_extension
 
-        # Check if the output_format has a different extension for it
-        oext = FORMAT2EXT.get(output_format, output_format)
-        return (oext, result)
+        if output_format == "html" or Pool.test:
+            return output_format, data
+        elif cls.render_method == "webkit":
+            return output_format, cls.wkhtml_to_pdf(data)
+        elif cls.render_method == "weasyprint":
+            return output_format, cls.weasyprint(data)
 
     @classmethod
     def render_template_genshi(cls, template_string, localcontext, translator):
@@ -137,6 +121,7 @@ class ReportWebkit(Report):
         refer to the Babel `Documentation
         <http://babel.edgewall.org/wiki/Documentation>`_.
         """
+
         def module_path(name):
             module, path = name.split('/', 1)
             with file_open(os.path.join(module, path)) as f:
@@ -173,7 +158,7 @@ class ReportWebkit(Report):
         Call wkhtmltopdf to convert the html to pdf
         """
         with tempfile.NamedTemporaryFile(
-            suffix='.html', prefix='trytond_', delete=False
+                suffix='.html', prefix='trytond_', delete=False
         ) as source_file:
             file_name = source_file.name
             source_file.write(data)
