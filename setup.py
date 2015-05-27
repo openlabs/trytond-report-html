@@ -42,6 +42,9 @@ major_version, minor_version, _ = VERSION.split('.', 2)
 major_version = int(major_version)
 minor_version = int(minor_version)
 
+MODULE = 'report_webkit'
+PREFIX = 'openlabs'
+
 requires = [
     'executor',
     'jinja2',
@@ -53,7 +56,7 @@ requires.append(
 )
 
 setup(
-    name='openlabs_report_webkit',
+    name='%s_%s' % (PREFIX, MODULE),
     version=VERSION,
     description="Tryton Webkit Report",
     author="Openlabs Technologies & consulting (P) Limited",
@@ -72,9 +75,11 @@ setup(
     ],
     packages=[
         'openlabs_report_webkit',
+        'trytond.modules.%s' % MODULE,
     ],
     package_dir={
         'openlabs_report_webkit': 'openlabs_report_webkit',
+        'trytond.modules.%s' % MODULE: '.',
     },
     license='GPL-3',
     install_requires=requires,
@@ -87,6 +92,10 @@ setup(
     zip_safe=False,
     test_suite='tests.suite',
     test_loader='trytond.test_loader:Loader',
+    entry_points="""
+    [trytond.modules]
+    %s = trytond.modules.%s
+    """ % (MODULE, MODULE),
     cmdclass={
         'test': SQLiteTest,
     },
