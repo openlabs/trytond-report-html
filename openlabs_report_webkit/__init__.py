@@ -43,6 +43,7 @@ class ReportWebkit(Report):
         pool = Pool()
         User = pool.get('res.user')
         Translation = pool.get('ir.translation')
+        Company = pool.get('company.company')
 
         localcontext['data'] = data
         localcontext['user'] = User(Transaction().user)
@@ -58,6 +59,9 @@ class ReportWebkit(Report):
         localcontext['setLang'] = lambda language: translate.set_language(
             language)
         localcontext['records'] = records
+
+        company_id = Transaction().context.get('company')
+        localcontext['company'] = Company(company_id)
 
         # Convert to str as buffer from DB is not supported by StringIO
         report_content = (str(report.report_content) if report.report_content
