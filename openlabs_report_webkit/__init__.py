@@ -35,6 +35,7 @@ class ReportWebkit(Report):
     def render(cls, report, report_context):
         pool = Pool()
         Translation = pool.get('ir.translation')
+        Company = pool.get('company.company')
 
         # Convert to str as buffer from DB is not supported by StringIO
         report_content = (str(report.report_content) if report.report_content
@@ -46,6 +47,9 @@ class ReportWebkit(Report):
                                      Translation)
         report_context['setLang'] = lambda language: translate.set_language(
             language)
+
+        company_id = Transaction().context.get('company')
+        report_context['company'] = Company(company_id)
 
         return cls.render_template(report_content, report_context, translate)
 

@@ -40,7 +40,7 @@ class ReportTestCase(unittest.TestCase):
     def setUp(self):
         register()
 
-        trytond.tests.test_tryton.install_module('res')
+        trytond.tests.test_tryton.install_module('report_webkit')
 
     def test_0010_render_report_xhtml(self):
         '''
