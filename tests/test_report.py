@@ -42,6 +42,37 @@ class ReportTestCase(unittest.TestCase):
 
         trytond.tests.test_tryton.install_module('report_webkit')
 
+        self.Currency = POOL.get('currency.currency')
+        self.Company = POOL.get('company.company')
+        self.Party = POOL.get('party.party')
+        self.User = POOL.get('res.user')
+
+    def setup_defaults(self):
+        """
+        Setup the defaults
+        """
+        with Transaction().set_context(company=None):
+            self.usd, = self.Currency.create([{
+                'name': 'US Dollar',
+                'code': 'USD',
+                'symbol': '$',
+            }])
+            self.party, = self.Party.create([{
+                'name': 'Openlabs',
+            }])
+            self.company, = self.Company.create([{
+                'party': self.party.id,
+                'currency': self.usd
+            }])
+        self.User.write(
+            [self.User(USER)], {
+                'main_company': self.company.id,
+                'company': self.company.id,
+            }
+        )
+
+        CONTEXT.update(self.User.get_preferences(context_only=True))
+
     def test_0010_render_report_xhtml(self):
         '''
         Render the report without PDF conversion
@@ -50,20 +81,23 @@ class ReportTestCase(unittest.TestCase):
         IRReport = POOL.get('ir.action.report')
 
         with Transaction().start(DB_NAME, USER, context=CONTEXT):
-            report_html, = IRReport.create([{
-                'name': 'HTML Report',
-                'model': 'res.user',
-                'report_name': 'res.user',
-                'report_content': buffer(
-                    '<h1>Hello, {{records[0].name}}!</h1>'
-                ),
-                'extension': 'html',
-            }])
-            val = UserReport.execute([USER], {})
-            self.assertEqual(val[0], u'html')
-            self.assertEqual(
-                str(val[1]), '<h1>Hello, Administrator!</h1>'
-            )
+            self.setup_defaults()
+
+            with Transaction().set_context(company=self.company.id):
+                report_html, = IRReport.create([{
+                    'name': 'HTML Report',
+                    'model': 'res.user',
+                    'report_name': 'res.user',
+                    'report_content': buffer(
+                        '<h1>Hello, {{records[0].name}}!</h1>'
+                    ),
+                    'extension': 'html',
+                }])
+                val = UserReport.execute([USER], {})
+                self.assertEqual(val[0], u'html')
+                self.assertEqual(
+                    str(val[1]), '<h1>Hello, Administrator!</h1>'
+                )
 
     def test_0020_render_unicode(self):
         '''
@@ -73,19 +107,24 @@ class ReportTestCase(unittest.TestCase):
         IRReport = POOL.get('ir.action.report')
 
         with Transaction().start(DB_NAME, USER, context=CONTEXT):
-            report_html, = IRReport.create([{
-                'name': 'HTML Report',
-                'model': 'res.user',
-                'report_name': 'res.user',
-                'report_content': buffer("<h1>Héllø, {{data['name']}}!</h1>"),
-                'extension': 'html',
-            }])
+            self.setup_defaults()
 
-            val = UserReport.execute([USER], {'name': u'Cédric'})
-            self.assertEqual(val[0], u'html')
-            self.assertEqual(
-                str(val[1]), '<h1>Héllø, Cédric!</h1>'
-            )
+            with Transaction().set_context(company=self.company.id):
+                report_html, = IRReport.create([{
+                    'name': 'HTML Report',
+                    'model': 'res.user',
+                    'report_name': 'res.user',
+                    'report_content': buffer(
+                        "<h1>Héllø, {{data['name']}}!</h1>"
+                    ),
+                    'extension': 'html',
+                }])
+
+                val = UserReport.execute([USER], {'name': u'Cédric'})
+                self.assertEqual(val[0], u'html')
+                self.assertEqual(
+                    str(val[1]), '<h1>Héllø, Cédric!</h1>'
+                )
 
     def test_0030_render_pdf(self):
         '''
@@ -95,32 +134,37 @@ class ReportTestCase(unittest.TestCase):
         IRReport = POOL.get('ir.action.report')
 
         with Transaction().start(DB_NAME, USER, context=CONTEXT):
-            report_html, = IRReport.create([{
-                'name': 'HTML Report',
-                'model': 'res.user',
-                'report_name': 'res.user',
-                'report_content': buffer("<h1>Héllø, {{data['name']}}!</h1>"),
-                'extension': 'pdf',
-            }])
+            self.setup_defaults()
 
-            # Set Pool.test as False as we need the report to be generated
-            # as PDF
-            Pool.test = False
-            val = UserReport.execute([USER], {'name': u'Cédric'})
-            self.assertEqual(val[0], u'pdf')
+            with Transaction().set_context(company=self.company.id):
+                report_html, = IRReport.create([{
+                    'name': 'HTML Report',
+                    'model': 'res.user',
+                    'report_name': 'res.user',
+                    'report_content': buffer(
+                        "<h1>Héllø, {{data['name']}}!</h1>"
+                    ),
+                    'extension': 'pdf',
+                }])
 
-            # Revert Pool.test back to True for other tests to run normally
-            Pool.test = True
+                # Set Pool.test as False as we need the report to be generated
+                # as PDF
+                Pool.test = False
+                val = UserReport.execute([USER], {'name': u'Cédric'})
+                self.assertEqual(val[0], u'pdf')
 
-            with tempfile.TemporaryFile() as file:
-                file.write(str(val[1]))
-                pdf = PdfFileReader(file)
+                # Revert Pool.test back to True for other tests to run normally
+                Pool.test = True
 
-                # Probably the only thing you can check from a shitty PDF
-                # format. God save Adobe and its god forsaken format.
-                #
-                # PDF IS EVIL
-                self.assertEqual(pdf.getNumPages(), 1)
+                with tempfile.TemporaryFile() as file:
+                    file.write(str(val[1]))
+                    pdf = PdfFileReader(file)
+
+                    # Probably the only thing you can check from a shitty PDF
+                    # format. God save Adobe and its god forsaken format.
+                    #
+                    # PDF IS EVIL
+                    self.assertEqual(pdf.getNumPages(), 1)
 
 
 def suite():
