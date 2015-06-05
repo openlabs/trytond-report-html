@@ -143,12 +143,23 @@ class ReportWebkit(Report):
         }
 
     @classmethod
+    def get_environment(cls):
+        """
+        Create and return a jinja environment to render templates
+
+        Downstream modules can override this method to easily make changes
+        to environment
+        """
+        env = Environment(loader=FunctionLoader(cls.jinja_loader_func))
+        env.filters.update(cls.get_jinja_filters())
+        return env
+
+    @classmethod
     def render_template(cls, template_string, localcontext, translator):
         """
         Render the template using Jinja2
         """
-        env = Environment(loader=FunctionLoader(cls.jinja_loader_func))
-        env.filters.update(cls.get_jinja_filters())
+        env = cls.get_environment()
         report_template = env.from_string(template_string.decode('utf-8'))
         return report_template.render(**localcontext).encode('utf-8')
 
