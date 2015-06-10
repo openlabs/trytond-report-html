@@ -35,6 +35,7 @@ class ReportWebkit(Report):
     def render(cls, report, report_context):
         pool = Pool()
         Translation = pool.get('ir.translation')
+        Company = pool.get('company.company')
 
         # Convert to str as buffer from DB is not supported by StringIO
         report_content = (str(report.report_content) if report.report_content
@@ -46,6 +47,9 @@ class ReportWebkit(Report):
                                      Translation)
         report_context['setLang'] = lambda language: translate.set_language(
             language)
+
+        company_id = Transaction().context.get('company')
+        report_context['company'] = Company(company_id)
 
         return cls.render_template(report_content, report_context, translate)
 
@@ -139,12 +143,30 @@ class ReportWebkit(Report):
         }
 
     @classmethod
+    def get_environment(cls):
+        """
+        Create and return a jinja environment to render templates
+
+        Downstream modules can override this method to easily make changes
+        to environment
+        """
+        env = Environment(loader=FunctionLoader(cls.jinja_loader_func))
+        env.filters.update(cls.get_jinja_filters())
+        return env
+
+    @classmethod
     def render_template(cls, template_string, localcontext, translator):
         """
         Render the template using Jinja2
         """
-        env = Environment(loader=FunctionLoader(cls.jinja_loader_func))
-        env.filters.update(cls.get_jinja_filters())
+        env = cls.get_environment()
+
+        # Update header and footer in context
+        company = localcontext['company']
+        localcontext.update({
+            'header': env.from_string(company.header_html or ''),
+            'footer': env.from_string(company.footer_html or ''),
+        })
         report_template = env.from_string(template_string.decode('utf-8'))
         return report_template.render(**localcontext).encode('utf-8')
 
